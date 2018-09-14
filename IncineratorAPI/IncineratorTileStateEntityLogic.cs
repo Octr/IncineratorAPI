@@ -4,7 +4,7 @@ using Staxel.Docks;
 using Staxel.Effects;
 using Staxel.Logic;
 using Staxel.TileStates.Docks;
-
+using System.Threading.Tasks;
 
 namespace IncineratorAPI
 {
@@ -25,9 +25,7 @@ namespace IncineratorAPI
 
         public override string AltInteractVerb()
         {
-            // return "controlHint.verb.Incinerate";
-            return
-            this.Component.InteractVerb;
+            return "IncineratorAPI.controlHint.verb.Incinerate";
         }
 
         public override bool SuppressInteractVerb()
@@ -42,19 +40,19 @@ namespace IncineratorAPI
             return Constants.CursorColor;
         }
 
-        public void TrashContents(Entity entity, EntityUniverseFacade facade)
+        public async void TrashContents(Entity entity, EntityUniverseFacade facade)
         {
-            bool flag = false;
+           
             foreach (DockSite dockSite in this._dockSites)
             {
                 if (dockSite.DockedItem.Stack.Count > 0)
-                    flag = true;
+  
+                this.Component = this._configuration.Components.Get<IncineratorEffectComponent>();
+                this._dockSites.First<DockSite>().EffectQueue.Trigger(new EffectTrigger(this.Component.BurnEffect));
+                await Task.Delay(1000);
                 dockSite.EmptyWithoutExploding(facade);
             }
-            if (!flag)
-                return;
-            this.Component = this._configuration.Components.Get<IncineratorEffectComponent>();
-            this._dockSites.First<DockSite>().EffectQueue.Trigger(new EffectTrigger(this.Component.BurnEffect));
+  
         }
 
     }
